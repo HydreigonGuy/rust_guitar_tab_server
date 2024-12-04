@@ -16,8 +16,8 @@ impl DbHandler {
     pub async fn new(url: &str) -> Result<Self, Box<dyn Error>> {
         let pool = sqlx::postgres::PgPool::connect(url).await?;
 
-        // Run migrations
-        sqlx::migrate!("./migrations").run(&pool).await?;
+        // Run migrations (commented while migrations don't exist)
+        //sqlx::migrate!("./migrations").run(&pool).await?;
 
         Ok(DbHandler { pool })
     }

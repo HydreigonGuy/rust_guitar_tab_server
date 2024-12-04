@@ -4,7 +4,9 @@ mod server;
 
 use crate::server::server::Server;
 
-fn main() {
-    let server = Server::new();
-    println!("Hello, world!");
+#[tokio::main]
+async fn main() {
+    let server = Server::new("127.0.0.1:8000").await.unwrap();
+    
+    server.run();
 }
