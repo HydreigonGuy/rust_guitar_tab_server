@@ -16,12 +16,18 @@ fn handle_connection(mut stream: TcpStream) {
     let mut buffer = [0; 1024];
 
     stream.read(&mut buffer).unwrap();
-    // println!("Request: {}", String::from_utf8_lossy(&buffer[..]))
+    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
 
-    let expected_header = b"GET / HTTP/1.1\r\n";
+    let home_header = b"GET / HTTP/1.1\r\n";
+    let new_tab_header = b"GET /new HTTP/1.1\r\n";
+    let styles_header = b"GET /styles.css HTTP/1.1\r\n";
 
-    if buffer.starts_with(expected_header) {
+    if buffer.starts_with(home_header) {
         home_page(stream);
+    } else if buffer.starts_with(new_tab_header) {
+        new_tab_page(stream);
+    } else if buffer.starts_with(styles_header) {
+        styles_file(stream);
     } else {
         page_does_not_exist(stream);
     }

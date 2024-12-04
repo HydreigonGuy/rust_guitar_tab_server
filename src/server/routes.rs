@@ -28,6 +28,14 @@ pub fn home_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/home.html".to_string());
 }
 
+pub fn new_tab_page(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "html/new_tab.html".to_string());
+}
+
 pub fn page_does_not_exist(mut stream: TcpStream) {
     send_resp_from_file(stream, 404, "html/404.html".to_string());
+}
+
+pub fn styles_file(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "css/styles.css".to_string());
 }
