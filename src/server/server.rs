@@ -4,7 +4,7 @@ use std::net::TcpStream;
 use std::io::prelude::*;
 use std::error::Error;
 use crate::db::db_handler::DbHandler;
-use crate::server::routes::home_page;
+use crate::server::routes::*;
 use crate::server::thread_pool::ThreadPool;
 
 pub struct Server {
@@ -22,9 +22,9 @@ fn handle_connection(mut stream: TcpStream) {
 
     if buffer.starts_with(expected_header) {
         home_page(stream);
-    }/* else {
-        send_resp_from_file(stream, 404, "html/404.html".to_string());
-    }*/
+    } else {
+        page_does_not_exist(stream);
+    }
 }
 
 impl Server {

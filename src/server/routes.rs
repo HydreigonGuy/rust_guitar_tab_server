@@ -27,3 +27,7 @@ fn send_resp_from_file(mut stream: TcpStream, code: usize, filename: String) {
 pub fn home_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/home.html".to_string());
 }
+
+pub fn page_does_not_exist(mut stream: TcpStream) {
+    send_resp_from_file(stream, 404, "html/404.html".to_string());
+}
