@@ -39,3 +39,7 @@ pub fn page_does_not_exist(mut stream: TcpStream) {
 pub fn styles_file(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "css/styles.css".to_string());
 }
+
+pub fn new_tab_js_file(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "js/new_tab.js".to_string());
+}
