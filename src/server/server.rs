@@ -22,6 +22,7 @@ fn handle_connection(mut stream: TcpStream) {
     let new_tab_header = b"GET /new HTTP/1.1\r\n";
     let styles_header = b"GET /styles.css HTTP/1.1\r\n";
     let new_tab_js_header = b"GET /new_tab.js HTTP/1.1\r\n";
+    let post_new_tab_header = b"POST /new_tab HTTP/1.1\r\n";
 
     if buffer.starts_with(home_header) {
         home_page(stream);
@@ -31,6 +32,8 @@ fn handle_connection(mut stream: TcpStream) {
         styles_file(stream);
     } else if buffer.starts_with(new_tab_js_header) {
         new_tab_js_file(stream);
+    } else if buffer.starts_with(post_new_tab_header) {
+        new_tab(stream);
     } else {
         page_does_not_exist(stream);
     }

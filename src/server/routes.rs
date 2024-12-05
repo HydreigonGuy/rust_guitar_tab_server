@@ -24,6 +24,12 @@ fn send_resp_from_file(mut stream: TcpStream, code: usize, filename: String) {
     stream.flush().unwrap();
 }
 
+fn send_success(mut stream: TcpStream) {
+    let response = "HTTP/1.1 200 OK\r\n\r\n";
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+}
+
 pub fn home_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/home.html".to_string());
 }
@@ -42,4 +48,9 @@ pub fn styles_file(mut stream: TcpStream) {
 
 pub fn new_tab_js_file(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "js/new_tab.js".to_string());
+}
+
+pub fn new_tab(mut stream: TcpStream) {
+    println!("Add new tab");
+    send_success(stream);
 }
