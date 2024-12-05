@@ -1,20 +1,31 @@
 
-var row = 1
+var row = 1;
+var max_row = 1;
 
 async function create_tab() {
     var title = document.getElementById("tab_name").value;
+    var tabs = [[], [], [], [], [], []];
 
     document.getElementById("error_msg").innerHTML = "";
     if (title == "") {
         document.getElementById("error_msg").innerHTML = "Please fill in the name of your tab";
         return;
     }
-    console.log(title);
+    for (var i = 1; i <= max_row - 1; i++) {
+        for (var j = 1; j <= 6; j++) {
+            var n = document.getElementById("row_" + i + "_string_" + j).innerHTML;
+
+            if (n == "-")
+                tabs[j - 1].push(0);
+            else
+                tabs[j - 1].push(parseInt(n));
+        }
+    }
     const resp = await fetch(
         "new_tab",
         {
             method: "POST",
-            body: JSON.stringify({ title: title }),
+            body: JSON.stringify({ title: title, tabs: tabs }),
         }
     );
     console.log(resp);
@@ -48,4 +59,6 @@ function next_row() {
     for (var i = 1; i <= 6; i++)
         update_row(i);
     row += 1;
+    if (row > max_row)
+        max_row = row;
 }
