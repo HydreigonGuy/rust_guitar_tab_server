@@ -2,3 +2,31 @@
 .error_title {
     text-decoration: red underline;
 }
+
+.tab_creater_container {
+    margin: 20px;
+}
+
+.tab_creater_string {
+    margin: 10px;
+    padding-top: 3px;
+}
+
+.tab_creater_next_btn {
+}
+
+.static_tab_bit {
+    padding-right: 4px;
+}
+
+.static_tab_row {
+    display: inline-table;
+}
+
+.static_tabs_container {
+    float: inline-start;
+}
+
+.active_tabs_container {
+    padding-top: 2px;
+}

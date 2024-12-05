@@ -4,7 +4,7 @@
         Guitar Tabs
     </title>
     <link rel="stylesheet" href="styles.css">
-    <script src="new_tab.js"></script> 
+    <script src="new_tab.js"></script>
 </head>
 <body>
     <h2>
@@ -13,4 +13,30 @@
     <p id="error_msg"></p>
     <input type="text" id="tab_name" placeholder="Tab Name"/>
     <button onclick="create_tab()">Create</button>
+    <div class="tab_creater_container">
+        <p id="tab_error_msg"></p>
+        <div id="prev_tabs" class="static_tabs_container">
+        </div>
+        <div class="active_tabs_container">
+            <div class="tab_creater_string">
+                <input id="string_select_1" type="number" value="0" min="0" max="24"/>
+                <button class="tab_creater_next_btn" onclick="next_row()">next ></button>
+            </div>
+            <div class="tab_creater_string">
+                <input id="string_select_2" type="number" value="0" min="0" max="24"/>
+            </div>
+            <div class="tab_creater_string">
+                <input id="string_select_3" type="number" value="0" min="0" max="24"/>
+            </div>
+            <div class="tab_creater_string">
+                <input id="string_select_4" type="number" value="0" min="0" max="24"/>
+            </div>
+            <div class="tab_creater_string">
+                <input id="string_select_5" type="number" value="0" min="0" max="24"/>
+            </div>
+            <div class="tab_creater_string">
+                <input id="string_select_6" type="number" value="0" min="0" max="24"/>
+            </div>
+        </div>
+    </div>
 </body>
