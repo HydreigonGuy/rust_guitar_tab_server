@@ -1,6 +1,7 @@
 
 mod db;
 mod server;
+mod models;
 
 use crate::server::server::Server;
 

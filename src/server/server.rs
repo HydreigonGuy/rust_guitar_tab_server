@@ -1,60 +1,45 @@
 
 use std::net::TcpListener;
-use std::net::TcpStream;
-use std::io::prelude::*;
 use std::error::Error;
-use crate::db::db_handler::DbHandler;
-use crate::server::routes::*;
 use crate::server::thread_pool::ThreadPool;
+use crate::server::router::route;
+use std::sync::Arc;
+use tokio::runtime::Runtime;
+
 
 pub struct Server {
-    db_handler: DbHandler,
+    db_pool: sqlx::PgPool,
     url: String
-}
-
-fn handle_connection(mut stream: TcpStream) {
-    let mut buffer = [0; 1024];
-
-    stream.read(&mut buffer).unwrap();
-    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
-
-    let home_header = b"GET / HTTP/1.1\r\n";
-    let new_tab_header = b"GET /new HTTP/1.1\r\n";
-    let styles_header = b"GET /styles.css HTTP/1.1\r\n";
-    let new_tab_js_header = b"GET /new_tab.js HTTP/1.1\r\n";
-    let post_new_tab_header = b"POST /new_tab HTTP/1.1\r\n";
-
-    if buffer.starts_with(home_header) {
-        home_page(stream);
-    } else if buffer.starts_with(new_tab_header) {
-        new_tab_page(stream);
-    } else if buffer.starts_with(styles_header) {
-        styles_file(stream);
-    } else if buffer.starts_with(new_tab_js_header) {
-        new_tab_js_file(stream);
-    } else if buffer.starts_with(post_new_tab_header) {
-        new_tab(stream);
-    } else {
-        page_does_not_exist(stream);
-    }
 }
 
 impl Server {
     pub async fn new(url: &str) -> Result<Self, Box<dyn Error>> {
-        let db_handler = DbHandler::new("postgres://user:password@localhost:5432/db").await?;
+        let db_pool = sqlx::postgres::PgPool::connect("postgres://user:password@localhost:5432/db").await?;
 
-        Ok(Server { db_handler, url: url.to_string() })
+        // Run db migrations
+        sqlx::migrate!("./migrations").run(&db_pool).await?;
+
+        Ok(Server { db_pool, url: url.to_string() })
     }
 
     pub fn run(&self) -> () {
         let listener: TcpListener = TcpListener::bind(self.url.clone()).unwrap();
     
         let thread_pool = ThreadPool::new(10); // 10 here is the number of threads there are
+        let runtime = Arc::new(Runtime::new().unwrap());
 
         for stream in listener.incoming() {
             let stream = stream.unwrap();
+            let db_p =  self.db_pool.clone();
             
-            thread_pool.execute(|| {handle_connection(stream);});
+            thread_pool.execute({
+                let runtime = Arc::clone(&runtime);
+                move || {
+                    runtime.block_on(async {
+                        route(stream, db_p).await;
+                    });
+                }
+            });
         }
     }
 }

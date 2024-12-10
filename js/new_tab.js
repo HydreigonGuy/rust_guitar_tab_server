@@ -25,7 +25,7 @@ async function create_tab() {
         "new_tab",
         {
             method: "POST",
-            body: JSON.stringify({ title: title, tabs: tabs }),
+            body: JSON.stringify({ title: title, tab: tabs }),
         }
     );
     console.log(resp);
