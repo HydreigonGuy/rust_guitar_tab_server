@@ -11,7 +11,7 @@ async function get_tabs() {
 
         document.getElementById("list_container").innerHTML = "";
         for (i = 0; i < tabs.length; i++) {
-            document.getElementById("list_container").innerHTML = document.getElementById("list_container").innerHTML + "<p>" + tabs[i].title + "</p>";
+            document.getElementById("list_container").innerHTML = document.getElementById("list_container").innerHTML + '<a class="tab_link" href="/list/' + tabs[i].id + '">' + tabs[i].title + "</a>";
         }
     })
 }

@@ -48,6 +48,10 @@ pub fn list_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/list.html".to_string());
 }
 
+pub fn tab_page(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "html/tab.html".to_string());
+}
+
 pub fn page_does_not_exist(mut stream: TcpStream) {
     send_resp_from_file(stream, 404, "html/404.html".to_string());
 }
@@ -62,6 +66,10 @@ pub fn new_tab_js_file(mut stream: TcpStream) {
 
 pub fn list_js_file(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "js/list.js".to_string());
+}
+
+pub fn tab_js_file(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "js/tab.js".to_string());
 }
 
 pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {
@@ -123,21 +131,50 @@ fn decyfer_tab_from_db(s: String) -> Vec<Vec<u32>> {
 }
 
 pub async fn list_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(),  Box<dyn Error>> {
-    let q = "SELECT title, tab FROM tab";
+    let q = "SELECT id, title, tab FROM tab";
     let rows = sqlx::query(q).fetch_all(&db_pool).await?;
     let mut tabs = Vec::<String>::new();
 
     for row in rows {
+        let id: i32 = row.get("id");
         let title: String = row.get("title");
 
         let tab: String = row.get_unchecked("tab");
         let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);
 
-        tabs.push(format!("{{\"title\":\"{}\",\"tab\":{:?}}}", title, tab));
+        tabs.push(format!("{{\"id\":{},\"title\":\"{}\",\"tab\":{:?}}}", id, title, tab));
     }
 
     let contents = format!("{{\"res\":[{}]}}", tabs.join(","));
 
+    let response = format!(
+        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+        contents.len(),
+        contents
+    );
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+    Ok(())
+}
+
+pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, request: [u8; 1024]) -> Result<(), Box<dyn Error>> {
+    let mut id: Vec<u8> = Vec::<u8>::new();
+    let mut i = 9;
+
+    while request[i] >= b'0' && request[i] <= b'9' {
+        id.push(request[i]);
+        i += 1;
+    }
+    let q = format!("SELECT title, tab FROM tab WHERE id = {}", std::str::from_utf8(&id).unwrap());
+    println!("{}", q);
+    let row = sqlx::query(&q).fetch_one(&db_pool).await?;
+
+    let title: String = row.get("title");
+
+    let tab: String = row.get_unchecked("tab");
+    let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);
+
+    let contents = format!("{{\"title\":\"{}\",\"tab\":{:?}}}", title, tab);
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
         contents.len(),

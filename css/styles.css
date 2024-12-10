@@ -30,3 +30,9 @@
 .active_tabs_container {
     padding-top: 2px;
 }
+
+.tab_link {
+    display: block;
+    color: black;
+    margin: 4px;
+}

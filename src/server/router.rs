@@ -7,7 +7,6 @@ use crate::db::db_handler::DbHandler;
 
 
 pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {
-    println!("Hi");
     let mut buffer = [0; 1024];
 
 
@@ -17,11 +16,14 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
     let home_header = b"GET / HTTP/1.1\r\n";
     let new_tab_header = b"GET /new HTTP/1.1\r\n";
     let list_header = b"GET /list HTTP/1.1\r\n";
+    let tab_header = b"GET /list/";
     let styles_header = b"GET /styles.css HTTP/1.1\r\n";
     let new_tab_js_header = b"GET /new_tab.js HTTP/1.1\r\n";
     let list_js_header = b"GET /list.js HTTP/1.1\r\n";
+    let tab_js_header = b"GET /tab.js HTTP/1.1\r\n";
     let post_new_tab_header = b"POST /new_tab HTTP/1.1\r\n";
     let tab_list_header = b"GET /tab_list HTTP/1.1\r\n";
+    let tab_get_header = b"GET /tab/";
 
     if buffer.starts_with(home_header) {
         home_page(stream);
@@ -39,6 +41,12 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
         list_js_file(stream);
     } else if buffer.starts_with(tab_list_header) {
         list_tabs(stream, db_pool).await?;
+    } else if buffer.starts_with(tab_header) {
+        tab_page(stream);
+    } else if buffer.starts_with(tab_js_header) {
+        tab_js_file(stream);
+    } else if buffer.starts_with(tab_get_header) {
+        tab_get(stream, db_pool, buffer).await?;
     } else {
         page_does_not_exist(stream);
     }
