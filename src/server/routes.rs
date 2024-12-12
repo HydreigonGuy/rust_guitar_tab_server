@@ -44,10 +44,6 @@ pub fn new_tab_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/new_tab.html".to_string());
 }
 
-pub fn list_page(mut stream: TcpStream) {
-    send_resp_from_file(stream, 200, "html/list.html".to_string());
-}
-
 pub fn tab_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/tab.html".to_string());
 }

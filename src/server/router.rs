@@ -15,7 +15,6 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
 
     let home_header = b"GET / HTTP/1.1\r\n";
     let new_tab_header = b"GET /new HTTP/1.1\r\n";
-    let list_header = b"GET /list HTTP/1.1\r\n";
     let tab_header = b"GET /list/";
     let styles_header = b"GET /styles.css HTTP/1.1\r\n";
     let new_tab_js_header = b"GET /new_tab.js HTTP/1.1\r\n";
@@ -35,8 +34,6 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
         new_tab_js_file(stream);
     } else if buffer.starts_with(post_new_tab_header) {
         new_tab(stream, std::str::from_utf8(&buffer).unwrap().to_string(), db_pool).await?;
-    } else if buffer.starts_with(list_header) {
-        list_page(stream);
     } else if buffer.starts_with(list_js_header) {
         list_js_file(stream);
     } else if buffer.starts_with(tab_list_header) {

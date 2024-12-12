@@ -4,15 +4,21 @@
         Guitar Tabs
     </title>
     <link rel="stylesheet" href="styles.css">
+    <script src="list.js"></script>
 </head>
 <body>
     <h2>
         Guitar Tabs
     </h2>
-    <a href="/new">
-        Create new tab
-    </a>
-    <a href="/list">
-        View existing tabs
-    </a>
+    <div>
+        <a href="/new">
+            Create new tab
+        </a>
+    </div>
+    <div>
+        <h4>Created tabs:</h4>
+        <p id="error_msg"></p>
+        <div id="list_container">
+        </div>
+    </div>
 </body>
