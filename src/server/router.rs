@@ -3,7 +3,6 @@ use std::error::Error;
 use crate::server::routes::*;
 use std::net::TcpStream;
 use std::io::prelude::*;
-use crate::db::db_handler::DbHandler;
 
 
 pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {

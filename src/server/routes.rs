@@ -6,7 +6,6 @@ use sqlx::Row;
 use std::error::Error;
 
 use crate::models::tab::Tab;
-use crate::db::db_handler::DbHandler;
 
 
 fn send_resp_from_file(mut stream: TcpStream, code: usize, filename: String) {
