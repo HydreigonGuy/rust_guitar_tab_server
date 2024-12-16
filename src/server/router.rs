@@ -10,41 +10,29 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
 
 
     stream.read(&mut buffer).unwrap();
-    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
 
-    let home_header = b"GET / HTTP/1.1\r\n";
-    let new_tab_header = b"GET /new HTTP/1.1\r\n";
-    let tab_header = b"GET /list/";
-    let styles_header = b"GET /styles.css HTTP/1.1\r\n";
-    let new_tab_js_header = b"GET /new_tab.js HTTP/1.1\r\n";
-    let list_js_header = b"GET /list.js HTTP/1.1\r\n";
-    let tab_js_header = b"GET /tab.js HTTP/1.1\r\n";
-    let post_new_tab_header = b"POST /new_tab HTTP/1.1\r\n";
-    let tab_list_header = b"GET /tab_list HTTP/1.1\r\n";
-    let tab_get_header = b"GET /tab/";
+    let method = String::from_utf8_lossy(&buffer[..]).split(" ").collect::<Vec<&str>>()[0].to_string();
+    let path = String::from_utf8_lossy(&buffer[..]).split(" ").collect::<Vec<&str>>()[1].to_string();
 
-    if buffer.starts_with(home_header) {
-        home_page(stream);
-    } else if buffer.starts_with(new_tab_header) {
-        new_tab_page(stream);
-    } else if buffer.starts_with(styles_header) {
-        styles_file(stream);
-    } else if buffer.starts_with(new_tab_js_header) {
-        new_tab_js_file(stream);
-    } else if buffer.starts_with(post_new_tab_header) {
-        new_tab(stream, std::str::from_utf8(&buffer).unwrap().to_string(), db_pool).await?;
-    } else if buffer.starts_with(list_js_header) {
-        list_js_file(stream);
-    } else if buffer.starts_with(tab_list_header) {
-        list_tabs(stream, db_pool).await?;
-    } else if buffer.starts_with(tab_header) {
-        tab_page(stream);
-    } else if buffer.starts_with(tab_js_header) {
-        tab_js_file(stream);
-    } else if buffer.starts_with(tab_get_header) {
-        tab_get(stream, db_pool, buffer).await?;
-    } else {
-        page_does_not_exist(stream);
+    if method == "POST" {
+        match path.as_str() {
+            "new_tab" => new_tab(stream, std::str::from_utf8(&buffer).unwrap().to_string(), db_pool).await?,
+            _ => page_does_not_exist(stream),
+        }
+    } else if method == "GET" {
+        match path.split("/").collect::<Vec<&str>>()[1] {
+            "" => home_page(stream),
+            "new" => new_tab_page(stream),
+            "tab_list" => list_tabs(stream, db_pool).await?,
+            "list" => tab_page(stream),
+            "tab" => tab_get(stream, db_pool, buffer).await?,
+            "styles.css" => styles_file(stream),
+            "new_tab.js" => new_tab_js_file(stream),
+            "list.js" => list_js_file(stream),
+            "tab.js" => tab_js_file(stream),
+            _ => page_does_not_exist(stream),
+        }
     }
+
     Ok(())
 }
