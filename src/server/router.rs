@@ -7,16 +7,47 @@ use std::io::prelude::*;
 
 pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {
     let mut buffer = [0; 1024];
+    let mut req = Vec::new();
+    let mut request: String;
 
+    loop {
+        match stream.read(&mut buffer) {
+            Ok(0) => {
+                break;
+            }
+            Ok(n) => {
+                req.extend_from_slice(&buffer[..n]);
+                request = String::from_utf8(req.clone()).unwrap();
+                if req.ends_with(b"\r\n\r\n") {
+                    break;
+                }
+                if request.contains("\r\n\r\n") {
+                    // this is for POST  requests to retrieve the whole body
+                    let contents = request.split("\r\n\r\n").collect::<Vec<&str>>()[1];
+                    let tmp = request.split("Content-Length: ").collect::<Vec<&str>>()[1].to_string();
+                    let len = tmp.split("\r\n").collect::<Vec<&str>>()[0];
+                    if len.to_string().parse::<usize>().unwrap() <= contents.len() {
+                        break;
+                    }
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to read from connection: {}", e);
+                return Ok(());
+            }
+        }
+    }
 
-    stream.read(&mut buffer).unwrap();
+    let request = String::from_utf8(req).unwrap();
 
-    let method = String::from_utf8_lossy(&buffer[..]).split(" ").collect::<Vec<&str>>()[0].to_string();
-    let path = String::from_utf8_lossy(&buffer[..]).split(" ").collect::<Vec<&str>>()[1].to_string();
+    println!("{}", request);
+
+    let method = request.split(" ").collect::<Vec<&str>>()[0].to_string();
+    let path = request.split(" ").collect::<Vec<&str>>()[1].to_string();
 
     if method == "POST" {
         match path.as_str() {
-            "new_tab" => new_tab(stream, std::str::from_utf8(&buffer).unwrap().to_string(), db_pool).await?,
+            "new_tab" => new_tab(stream, request, db_pool).await?,
             _ => page_does_not_exist(stream),
         }
     } else if method == "GET" {
@@ -25,7 +56,10 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
             "new" => new_tab_page(stream),
             "tab_list" => list_tabs(stream, db_pool).await?,
             "list" => tab_page(stream),
-            "tab" => tab_get(stream, db_pool, buffer).await?,
+            "tab" => {
+                let id = path.split("/").collect::<Vec<&str>>()[2];
+                tab_get(stream, db_pool, id).await?;
+            }
             "styles.css" => styles_file(stream),
             "new_tab.js" => new_tab_js_file(stream),
             "list.js" => list_js_file(stream),

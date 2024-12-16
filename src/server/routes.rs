@@ -152,15 +152,8 @@ pub async fn list_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(
     Ok(())
 }
 
-pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, request: [u8; 1024]) -> Result<(), Box<dyn Error>> {
-    let mut id: Vec<u8> = Vec::<u8>::new();
-    let mut i = 9;
-
-    while request[i] >= b'0' && request[i] <= b'9' {
-        id.push(request[i]);
-        i += 1;
-    }
-    let q = format!("SELECT title, tab FROM tab WHERE id = {}", std::str::from_utf8(&id).unwrap());
+pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str) -> Result<(), Box<dyn Error>> {
+    let q = format!("SELECT title, tab FROM tab WHERE id = {}", id.to_string());
     println!("{}", q);
     let row = sqlx::query(&q).fetch_one(&db_pool).await?;
 
