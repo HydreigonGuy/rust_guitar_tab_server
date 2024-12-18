@@ -49,6 +49,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
         match path.split("/").collect::<Vec<&str>>()[1] {
             "new_tab" => new_tab(stream, request, db_pool).await?,
             "login" => login(stream, db_pool, request.split("\r\n\r\n").collect::<Vec<&str>>()[1]).await?,
+            "register" => register(stream, db_pool, request.split("\r\n\r\n").collect::<Vec<&str>>()[1]).await?,
             _ => page_does_not_exist(stream),
         }
     } else if method == "GET" {
@@ -62,6 +63,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
                 tab_get(stream, db_pool, id).await?;
             }
             "login" => login_page(stream),
+            "register" => register_page(stream),
             "styles.css" => styles_file(stream),
             "new_tab.js" => new_tab_js_file(stream),
             "list.js" => list_js_file(stream),
