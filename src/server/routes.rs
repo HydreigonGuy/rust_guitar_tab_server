@@ -47,6 +47,10 @@ pub fn tab_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/tab.html".to_string());
 }
 
+pub fn login_page(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "html/login.html".to_string());
+}
+
 pub fn page_does_not_exist(mut stream: TcpStream) {
     send_resp_from_file(stream, 404, "html/404.html".to_string());
 }
@@ -170,5 +174,10 @@ pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str) -> 
     );
     stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
+    Ok(())
+}
+
+pub async fn login(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) -> Result<(), Box<dyn Error>> {
+    println!("Given data: {}", body);
     Ok(())
 }
