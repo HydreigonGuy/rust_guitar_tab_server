@@ -196,6 +196,10 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
 
     // add protection against SQL injections here!!!
 
-    println!("username: {}, password: {}", username, password);
+    // add something to make sure username is not already taken
+
+    let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, password);
+    sqlx::query(&q).execute(&db_pool).await?;
+    send_success(stream);
     Ok(())
 }
