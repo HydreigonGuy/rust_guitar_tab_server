@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::fs;
 use sqlx::Row;
 use std::error::Error;
+use pwhash::bcrypt;
 
 use crate::models::tab::Tab;
 
@@ -187,6 +188,14 @@ pub async fn login(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) -> 
 }
 
 pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) -> Result<(), Box<dyn Error>> {
-    println!("Given data: {}", body);
+    let username = body.to_string().split("username=").collect::<Vec<&str>>()[1].to_string();
+    let username = username.split("&").collect::<Vec<&str>>()[0];
+    let password = body.to_string().split("password=").collect::<Vec<&str>>()[1].to_string();
+    let password = password.split("&").collect::<Vec<&str>>()[0];
+    let password = bcrypt::hash(password).unwrap(); // hash password
+
+    // add protection against SQL injections here!!!
+
+    println!("username: {}, password: {}", username, password);
     Ok(())
 }
