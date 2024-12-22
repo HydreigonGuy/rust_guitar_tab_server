@@ -80,6 +80,10 @@ pub fn register_js_file(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "js/register.js".to_string());
 }
 
+pub fn login_js_file(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "js/login.js".to_string());
+}
+
 pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {
     let req_split = request.split_once("\r\n\r\n");
 
@@ -188,6 +192,7 @@ pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str) -> 
 
 pub async fn login(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) -> Result<(), Box<dyn Error>> {
     println!("Given data: {}", body);
+    send_success(stream);
     Ok(())
 }
 
