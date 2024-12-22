@@ -4,20 +4,19 @@
         Guitar Tabs
     </title>
     <link rel="stylesheet" href="/styles.css">
+    <script src="register.js"></script>
 </head>
 <body>
     <a href="/">back to list</a>
     <h2>Register</h2>
-    <form method="post" action="/register">
         <p>
             Username
         </p>
-        <input name="username" type="text"/>
+        <input id="username" type="text"/>
         <p>
             Password
         </p>
-        <input name="password" type="password"/>
-        <input type="submit" value="Register"/>
-    </form>
+        <input id="password" type="password"/>
+        <button onclick="register()">Register</button>
     <a href="/login">already have an account</a>
 </body>
