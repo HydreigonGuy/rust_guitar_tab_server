@@ -37,6 +37,18 @@ fn send_success(mut stream: TcpStream) {
     stream.flush().unwrap();
 }
 
+fn send_server_error(mut stream: TcpStream) {
+    let response = "HTTP/1.1 500 SERVER ERROR\r\n\r\n";
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+}
+
+fn send_error(mut stream: TcpStream) {
+    let response = "HTTP/1.1 400 ERROR\r\n\r\n";
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+}
+
 pub fn home_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/home.html".to_string());
 }
@@ -192,8 +204,26 @@ pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str) -> 
 }
 
 pub async fn login(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) -> Result<(), Box<dyn Error>> {
-    println!("Given data: {}", body);
-    send_success(stream);
+    let username = body.to_string().split("username=").collect::<Vec<&str>>()[1].to_string();
+    let username = username.split("&").collect::<Vec<&str>>()[0];
+    let password = body.to_string().split("password=").collect::<Vec<&str>>()[1].to_string();
+    let password = password.split("&").collect::<Vec<&str>>()[0];
+    //let password = bcrypt::hash(password).unwrap(); // hash password
+
+    // add protection against SQL injections here!!! (just need to check username since pw is getting hashed)
+
+    match check_login_auth(db_pool.clone(), username, &password).await {
+        Ok(true) => {
+            send_success(stream);
+        }
+        Ok(false) => {
+            // login failed
+            send_error(stream);
+        }
+        _ => {
+            send_server_error(stream);
+        }
+    }
     Ok(())
 }
 
@@ -202,7 +232,7 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
     let username = username.split("&").collect::<Vec<&str>>()[0];
     let password = body.to_string().split("password=").collect::<Vec<&str>>()[1].to_string();
     let password = password.split("&").collect::<Vec<&str>>()[0];
-    let password = bcrypt::hash(password).unwrap(); // hash password
+    //let password = bcrypt::hash(password).unwrap(); // hash password
 
     // add protection against SQL injections here!!! (just need to check username since pw is getting hashed)
 
@@ -212,15 +242,13 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
             let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, password);
             sqlx::query(&q).execute(&db_pool).await?;
             send_success(stream);
-            println!("DEBUG: user created");
         }
         Ok(true) => {
             // User already exists, change to respond accordingly
-            send_success(stream);
-            println!("DEBUG: user already exists");
+            send_error(stream);
         }
         _ => {
-            // Return internal server error
+            send_server_error(stream);
         }
     }
     Ok(())
