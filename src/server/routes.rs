@@ -7,6 +7,7 @@ use std::error::Error;
 use pwhash::bcrypt;
 
 use crate::models::tab::Tab;
+use crate::db::db_handling::*;
 
 
 fn send_resp_from_file(mut stream: TcpStream, code: usize, filename: String) {
@@ -203,12 +204,24 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
     let password = password.split("&").collect::<Vec<&str>>()[0];
     let password = bcrypt::hash(password).unwrap(); // hash password
 
-    // add protection against SQL injections here!!!
+    // add protection against SQL injections here!!! (just need to check username since pw is getting hashed)
 
     // add something to make sure username is not already taken
-
-    let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, password);
-    sqlx::query(&q).execute(&db_pool).await?;
-    send_success(stream);
+    match check_if_username_is_taken(db_pool.clone(), username).await {
+        Ok(false) => {
+            let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, password);
+            sqlx::query(&q).execute(&db_pool).await?;
+            send_success(stream);
+            println!("DEBUG: user created");
+        }
+        Ok(true) => {
+            // User already exists, change to respond accordingly
+            send_success(stream);
+            println!("DEBUG: user already exists");
+        }
+        _ => {
+            // Return internal server error
+        }
+    }
     Ok(())
 }
