@@ -28,11 +28,25 @@
 }
 
 .active_tabs_container {
-    padding-top: 2px;
+    padding-top: 20px;
 }
 
 .tab_link {
     display: block;
     color: black;
     margin: 4px;
+}
+
+.edit_column_button {
+    display: block;
+    background-color: lightgray;
+    border: solid black 1px;
+    border-radius: 8px;
+}
+
+.delete_column_button {
+    display: block;
+    background-color: red;
+    border: solid black 1px;
+    border-radius: 8px;
 }

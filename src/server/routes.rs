@@ -236,7 +236,7 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
 
     // add protection against SQL injections here!!! (just need to check username since pw is getting hashed)
 
-    // add something to make sure username is not already taken
+    // make sure username is not already taken
     match check_if_username_is_taken(db_pool.clone(), username).await {
         Ok(false) => {
             let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, password);
