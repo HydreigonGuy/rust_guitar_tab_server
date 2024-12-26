@@ -14,6 +14,16 @@ async function create_tab() {
         document.getElementById("error_msg").innerHTML = "Please fill in the name of your tab";
         return;
     }
+    if (editing.length != 0) { // put all editing tabs back to complete
+        for (var i = 1; i <= max_row - 1; i++) {
+            if (editing.indexOf(i) != -1) {
+                edit_row(i);
+            }
+            if (editing.indexOf(i) != -1) {
+                return;
+            }
+        }
+    }
     for (var i = 1; i <= max_row - 1; i++) {
         if (deleted.indexOf(i) == -1) {
             for (var j = 1; j <= 6; j++) {
@@ -77,6 +87,7 @@ function delete_row(row) {
 }
 
 function edit_row(row) {
+    document.getElementById("tab_error_msg").innerHTML = ""
     if (deleted.indexOf(row) != -1) {
         return;
     }
