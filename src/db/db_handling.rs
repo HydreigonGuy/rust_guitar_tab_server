@@ -30,12 +30,14 @@ pub async fn check_login_auth(db_pool: sqlx::PgPool, username: &str, password: &
 }
 
 pub async fn create_token_for_user(db_pool: sqlx::PgPool, user_id: i32) -> Result<String, Box<dyn Error>> {
-    let s: String = rand::thread_rng()
+    let token: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(64)
         .map(char::from)
         .collect();
-    Ok(s)
+    let query = format!("UPDATE users SET token = '{}' WHERE id = {}", token, user_id);
+    sqlx::query(&query).execute(&db_pool).await?;
+    Ok(token)
 }
 
 pub async fn get_user_id(db_pool: sqlx::PgPool, username: &str) -> Result<i32, Box<dyn Error>> {

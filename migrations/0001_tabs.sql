@@ -1,7 +1,8 @@
 create table users (
     id SERIAL PRIMARY KEY,
     username varchar not null,
-    password varchar not null
+    password varchar not null,
+    token varchar
 );
 
 create table tab (
