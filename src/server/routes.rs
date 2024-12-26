@@ -37,6 +37,12 @@ fn send_success(mut stream: TcpStream) {
     stream.flush().unwrap();
 }
 
+fn send_token(mut stream: TcpStream, token: String) {
+    let response = format!("HTTP/1.1 200 OK\r\nToken: {}\r\n\r\n", token);
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+}
+
 fn send_server_error(mut stream: TcpStream) {
     let response = "HTTP/1.1 500 SERVER ERROR\r\n\r\n";
     stream.write(response.as_bytes()).unwrap();
@@ -214,7 +220,9 @@ pub async fn login(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) -> 
 
     match check_login_auth(db_pool.clone(), username, &password).await {
         Ok(true) => {
-            send_success(stream);
+            let id = get_user_id(db_pool.clone(), username).await?;
+            let token = create_token_for_user(db_pool.clone(), id).await?;
+            send_token(stream, token);
         }
         Ok(false) => {
             // login failed
@@ -241,7 +249,9 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
         Ok(false) => {
             let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, password);
             sqlx::query(&q).execute(&db_pool).await?;
-            send_success(stream);
+            let id = get_user_id(db_pool.clone(), username).await?;
+            let token = create_token_for_user(db_pool.clone(), id).await?;
+            send_token(stream, token);
         }
         Ok(true) => {
             // User already exists, change to respond accordingly

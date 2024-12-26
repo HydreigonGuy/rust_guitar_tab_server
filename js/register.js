@@ -11,6 +11,7 @@ async function register() {
     );
     console.log(resp);
     if (resp.status == 200) {
+        document.cookie = "token=" + resp.headers.get("token");
         window.location.href = "/"
     }
 }
