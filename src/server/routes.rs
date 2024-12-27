@@ -109,6 +109,10 @@ pub fn login_js_file(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "js/login.js".to_string());
 }
 
+pub fn logout_js_file(mut stream: TcpStream) {
+    send_resp_from_file(stream, 200, "js/logout.js".to_string());
+}
+
 pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {
     let req_split = request.split_once("\r\n\r\n");
 

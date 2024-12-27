@@ -98,6 +98,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
                         "tab.js" => tab_js_file(stream),
                         "register.js" => register_js_file(stream),
                         "login.js" => login_js_file(stream),
+                        "logout.js" => logout_js_file(stream),
                         _ => page_does_not_exist(stream),
                     }
                 }
