@@ -46,3 +46,10 @@ pub async fn get_user_id(db_pool: sqlx::PgPool, username: &str) -> Result<i32, B
 
     Ok(row.get("id"))
 }
+
+pub async fn get_user_id_from_token(db_pool: sqlx::PgPool, token: &str) -> Result<i32, Box<dyn Error>> {
+    let q = format!("SELECT id FROM users WHERE token = '{}'", token.to_string());
+    let row = sqlx::query(&q).fetch_one(&db_pool).await?;
+
+    Ok(row.get("id"))
+}

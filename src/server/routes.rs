@@ -55,6 +55,12 @@ fn send_error(mut stream: TcpStream) {
     stream.flush().unwrap();
 }
 
+pub fn redirect_to_login(mut stream: TcpStream) {
+    let response = "HTTP/1.1 303 Redirect\r\nLocation: /login\r\n\r\n";
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+}
+
 pub fn home_page(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "html/home.html".to_string());
 }
