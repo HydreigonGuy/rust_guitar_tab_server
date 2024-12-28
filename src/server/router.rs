@@ -75,7 +75,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
             if let Ok(user_id) = get_user_id_from_token(db_pool.clone(), token).await {
                 if method == "POST" {
                     match path.split("/").collect::<Vec<&str>>()[1] {
-                        "new_tab" => new_tab(stream, request, db_pool).await?,
+                        "new_tab" => new_tab(stream, request, db_pool, user_id).await?,
                         "login" => login(stream, db_pool, request.split("\r\n\r\n").collect::<Vec<&str>>()[1]).await?,
                         "register" => register(stream, db_pool, request.split("\r\n\r\n").collect::<Vec<&str>>()[1]).await?,
                         _ => page_does_not_exist(stream),
@@ -84,7 +84,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
                     match path.split("/").collect::<Vec<&str>>()[1] {
                         "" => home_page(stream),
                         "new" => new_tab_page(stream),
-                        "tab_list" => list_tabs(stream, db_pool).await?,
+                        "tab_list" => list_tabs(stream, db_pool, user_id).await?,
                         "list" => tab_page(stream),
                         "tab" => {
                             let id = path.split("/").collect::<Vec<&str>>()[2];

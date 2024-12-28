@@ -113,7 +113,7 @@ pub fn logout_js_file(mut stream: TcpStream) {
     send_resp_from_file(stream, 200, "js/logout.js".to_string());
 }
 
-pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {
+pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPool, user_id: i32) -> Result<(), Box<dyn Error>> {
     let req_split = request.split_once("\r\n\r\n");
 
     match req_split {
@@ -124,13 +124,14 @@ pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPo
             match json_result {
                 Ok(new_tab) => {
                     let query = format!(
-                        "INSERT INTO tab (title, tab) VALUES ('{}', ARRAY[{}])",
+                        "INSERT INTO tab (title, tab, UserID) VALUES ('{}', ARRAY[{}], {})",
                         new_tab.title, new_tab.tab.iter().map(
                             |string| {
                                 let string_str= string.iter().map(|n| n.to_string()).collect::<Vec<String>>().join(",");
                                 format!("[{}]", string_str)
                             }
-                        ).collect::<Vec<String>>().join(",")
+                        ).collect::<Vec<String>>().join(","),
+                        user_id
                     );
     
                     sqlx::query(&query).execute(&db_pool).await?;
@@ -171,9 +172,9 @@ fn decyfer_tab_from_db(s: String) -> Vec<Vec<u32>> {
     ret
 }
 
-pub async fn list_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(),  Box<dyn Error>> {
-    let q = "SELECT id, title, tab FROM tab";
-    let rows = sqlx::query(q).fetch_all(&db_pool).await?;
+pub async fn list_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool, user_id: i32) -> Result<(),  Box<dyn Error>> {
+    let q = format!("SELECT id, title, tab FROM tab WHERE UserID = {}", user_id);
+    let rows = sqlx::query(&q).fetch_all(&db_pool).await?;
     let mut tabs = Vec::<String>::new();
 
     for row in rows {
