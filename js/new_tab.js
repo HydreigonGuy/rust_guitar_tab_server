@@ -8,6 +8,7 @@ var editing = [];
 async function create_tab() {
     var title = document.getElementById("tab_name").value;
     var tabs = [[], [], [], [], [], []];
+    const visibility = parseInt(document.getElementById("visibillity_selecter").value);
 
     document.getElementById("error_msg").innerHTML = "";
     if (title == "") {
@@ -40,7 +41,7 @@ async function create_tab() {
         "new_tab",
         {
             method: "POST",
-            body: JSON.stringify({ title: title, tab: tabs }),
+            body: JSON.stringify({ title: title, tab: tabs, visibility: visibility }),
         }
     );
     console.log(resp);

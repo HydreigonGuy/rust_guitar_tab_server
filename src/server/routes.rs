@@ -124,14 +124,15 @@ pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPo
             match json_result {
                 Ok(new_tab) => {
                     let query = format!(
-                        "INSERT INTO tab (title, tab, UserID) VALUES ('{}', ARRAY[{}], {})",
+                        "INSERT INTO tab (title, tab, UserID, visibility) VALUES ('{}', ARRAY[{}], {}, {})",
                         new_tab.title, new_tab.tab.iter().map(
                             |string| {
                                 let string_str= string.iter().map(|n| n.to_string()).collect::<Vec<String>>().join(",");
                                 format!("[{}]", string_str)
                             }
                         ).collect::<Vec<String>>().join(","),
-                        user_id
+                        user_id,
+                        new_tab.visibility
                     );
     
                     sqlx::query(&query).execute(&db_pool).await?;
@@ -175,6 +176,33 @@ fn decyfer_tab_from_db(s: String) -> Vec<Vec<u32>> {
 pub async fn list_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool, user_id: i32) -> Result<(),  Box<dyn Error>> {
     let q = format!("SELECT id, title, tab FROM tab WHERE UserID = {}", user_id);
     let rows = sqlx::query(&q).fetch_all(&db_pool).await?;
+    let mut tabs = Vec::<String>::new();
+
+    for row in rows {
+        let id: i32 = row.get("id");
+        let title: String = row.get("title");
+
+        let tab: String = row.get_unchecked("tab");
+        let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);
+
+        tabs.push(format!("{{\"id\":{},\"title\":\"{}\",\"tab\":{:?}}}", id, title, tab));
+    }
+
+    let contents = format!("{{\"res\":[{}]}}", tabs.join(","));
+
+    let response = format!(
+        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+        contents.len(),
+        contents
+    );
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+    Ok(())
+}
+
+pub async fn list_public_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(),  Box<dyn Error>> {
+    let q = "SELECT id, title, tab FROM tab WHERE visibility = 1";
+    let rows = sqlx::query(q).fetch_all(&db_pool).await?;
     let mut tabs = Vec::<String>::new();
 
     for row in rows {
