@@ -63,7 +63,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
 
     let request = String::from_utf8(req).unwrap();
 
-    println!("{}", request);
+    //println!("{}", request);
 
     let method = request.split(" ").collect::<Vec<&str>>()[0].to_string();
     let path = request.split(" ").collect::<Vec<&str>>()[1].to_string();

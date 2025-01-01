@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use std::fs;
 use sqlx::Row;
 use std::error::Error;
-use pwhash::bcrypt;
+use bcrypt::hash;
 
 use crate::models::tab::Tab;
 use crate::db::db_handling::*;
@@ -286,7 +286,8 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
     // make sure username is not already taken
     match check_if_username_is_taken(db_pool.clone(), username).await {
         Ok(false) => {
-            let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, password);
+            let hash_password = hash(password, bcrypt::DEFAULT_COST).expect("Error hashing password");
+            let q = format!("INSERT INTO users (username, password) VALUES ('{}', '{}')", username, hash_password);
             sqlx::query(&q).execute(&db_pool).await?;
             let id = get_user_id(db_pool.clone(), username).await?;
             let token = create_token_for_user(db_pool.clone(), id).await?;
