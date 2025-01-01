@@ -16,7 +16,7 @@
             Create new tab
         </a>
     </div>
-    <div>
+    <div class="tab_list_half">
         <h4>Created tabs:</h4>
         <p id="error_msg"></p>
         <div id="list_container">
@@ -24,6 +24,12 @@
         <h4>Public tabs:</h4>
         <div id="public_list_container">
         </div>
+    </div>
+    <div class="tab_list_half">
+        <h4>Search</h4>
+        <input type="text" id="tab_search_name"/>
+        <button onclick="search_by_name()">search</button>
+        <p id="search_container"></p>
     </div>
     <div>
         <button onclick="logout()">logout</button>

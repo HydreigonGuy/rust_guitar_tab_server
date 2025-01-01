@@ -310,3 +310,57 @@ pub async fn register(mut stream: TcpStream, db_pool: sqlx::PgPool, body: &str) 
     }
     Ok(())
 }
+
+pub async fn tab_search(mut stream: TcpStream, search: &str, db_pool: sqlx::PgPool, user_id: i32) -> Result<(), Box<dyn Error>> {
+    let q = format!("SELECT id, title, tab FROM tab WHERE UserID = {} and title LIKE '%{}%'", user_id, search);
+    let rows = sqlx::query(&q).fetch_all(&db_pool).await?;
+    let mut tabs = Vec::<String>::new();
+
+    for row in rows {
+        let id: i32 = row.get("id");
+        let title: String = row.get("title");
+
+        let tab: String = row.get_unchecked("tab");
+        let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);
+
+        tabs.push(format!("{{\"id\":{},\"title\":\"{}\",\"tab\":{:?}}}", id, title, tab));
+    }
+
+    let contents = format!("{{\"res\":[{}]}}", tabs.join(","));
+
+    let response = format!(
+        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+        contents.len(),
+        contents
+    );
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+    Ok(())
+}
+
+pub async fn tab_search_pub(mut stream: TcpStream, search: &str, db_pool: sqlx::PgPool) -> Result<(), Box<dyn Error>> {
+    let q = format!("SELECT id, title, tab FROM tab WHERE visibility = 1 and title LIKE '%{}%'", search);
+    let rows = sqlx::query(&q).fetch_all(&db_pool).await?;
+    let mut tabs = Vec::<String>::new();
+
+    for row in rows {
+        let id: i32 = row.get("id");
+        let title: String = row.get("title");
+
+        let tab: String = row.get_unchecked("tab");
+        let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);
+
+        tabs.push(format!("{{\"id\":{},\"title\":\"{}\",\"tab\":{:?}}}", id, title, tab));
+    }
+
+    let contents = format!("{{\"res\":[{}]}}", tabs.join(","));
+
+    let response = format!(
+        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
+        contents.len(),
+        contents
+    );
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+    Ok(())
+}

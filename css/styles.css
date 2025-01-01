@@ -12,9 +12,6 @@
     padding-top: 3px;
 }
 
-.tab_creater_next_btn {
-}
-
 .static_tab_bit {
     padding-right: 4px;
 }
@@ -71,4 +68,11 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.tab_list_half {
+    display: inline-block;
+    width: auto;
+    vertical-align: top;
+    padding: 30px;
 }

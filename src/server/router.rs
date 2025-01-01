@@ -63,7 +63,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
 
     let request = String::from_utf8(req).unwrap();
 
-    //println!("{}", request);
+    println!("{}", request);
 
     let method = request.split(" ").collect::<Vec<&str>>()[0].to_string();
     let path = request.split(" ").collect::<Vec<&str>>()[1].to_string();
@@ -78,6 +78,8 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
                         "new_tab" => new_tab(stream, request, db_pool, user_id).await?,
                         "login" => login(stream, db_pool, request.split("\r\n\r\n").collect::<Vec<&str>>()[1]).await?,
                         "register" => register(stream, db_pool, request.split("\r\n\r\n").collect::<Vec<&str>>()[1]).await?,
+                        "tab_search" => tab_search(stream, request.split("\r\n\r\n").collect::<Vec<&str>>()[1], db_pool, user_id).await?,
+                        "tab_search_pub" => tab_search_pub(stream, request.split("\r\n\r\n").collect::<Vec<&str>>()[1], db_pool).await?,
                         _ => page_does_not_exist(stream),
                     }
                 } else if method == "GET" {
