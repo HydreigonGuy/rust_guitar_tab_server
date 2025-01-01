@@ -19,8 +19,6 @@ pub async fn check_if_username_is_taken(db_pool: sqlx::PgPool, username: &str) -
 }
 
 pub async fn check_login_auth(db_pool: sqlx::PgPool, username: &str, password: &str) -> Result<bool, Box<dyn Error>> {
-    //let hash_password = hash(password, bcrypt::DEFAULT_COST).expect("Error hashing password");
-    //println!("Pw: {}, hashed: {}", password, hash_password);
     let q = format!("SELECT id, password FROM users WHERE username = '{}'", username.to_string());
     let rows = sqlx::query(&q).fetch_all(&db_pool).await?;
     let mut c = 0;
