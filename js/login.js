@@ -2,6 +2,7 @@
 var a;
 
 async function login() {
+    document.getElementById("loader").className = "loader";
     var body = "username=" + document.getElementById("username").value
         + "&password=" + document.getElementById("password").value;
     const resp = await fetch(
@@ -15,4 +16,5 @@ async function login() {
         document.cookie = "token=" + resp.headers.get("token");
         window.location.href = "/";
     }
+    document.getElementById("loader").className = "";
 }
