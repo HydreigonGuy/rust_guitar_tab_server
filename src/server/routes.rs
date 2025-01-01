@@ -227,12 +227,19 @@ pub async fn list_public_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool) -> R
     Ok(())
 }
 
-pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str) -> Result<(), Box<dyn Error>> {
-    let q = format!("SELECT title, tab FROM tab WHERE id = {}", id.to_string());
+pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str, user_id: i32) -> Result<(), Box<dyn Error>> {
+    let q = format!("SELECT title, tab, UserID, visibility FROM tab WHERE id = {}", id.to_string());
     println!("{}", q);
     let row = sqlx::query(&q).fetch_one(&db_pool).await?;
 
     let title: String = row.get("title");
+
+    let tab_user_id: i32 = row.get("userid");
+    let visibility: i32 = row.get("visibility"); // 0 for private, 1 for public
+    if visibility == 0 && tab_user_id != user_id {
+        page_does_not_exist(stream);
+        return Ok(());
+    }
 
     let tab: String = row.get_unchecked("tab");
     let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);

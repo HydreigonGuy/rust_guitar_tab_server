@@ -89,7 +89,7 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
                         "list" => tab_page(stream),
                         "tab" => {
                             let id = path.split("/").collect::<Vec<&str>>()[2];
-                            tab_get(stream, db_pool, id).await?;
+                            tab_get(stream, db_pool, id, user_id).await?;
                         }
                         "login" => login_page(stream),
                         "register" => register_page(stream),
