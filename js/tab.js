@@ -14,10 +14,17 @@ async function get_tab() {
         for (i = 0; i < tab.tab[0].length; i++) {
             tab_contents = tab_contents + '<div class="static_tab_row">'
             for (j = 0; j < 6; j++) {
-                if (tab.tab[j][i] == 0)
-                    tab_contents = tab_contents + '<p class="static_tab_bit">-</p>'
-                else
-                tab_contents = tab_contents + '<p class="static_tab_bit">' + tab.tab[j][i] + "</p>"
+                if (tab.tab[j][i] > 99) {
+                    if (tab.tab[j][i] == 100)
+                        tab_contents = tab_contents + '<p class="static_tab_bit">-</p>'
+                    if (tab.tab[j][i] == 101)
+                        tab_contents = tab_contents + '<p class="static_tab_bit">X</p>'
+                    if (tab.tab[j][i] == 102)
+                        tab_contents = tab_contents + '<p class="static_tab_bit">~</p>'
+                    if (tab.tab[j][i] == 103)
+                        tab_contents = tab_contents + '<p class="static_tab_bit">/</p>'
+                 } else
+                    tab_contents = tab_contents + '<p class="static_tab_bit">' + tab.tab[j][i] + "</p>"
             }
             tab_contents = tab_contents + "</div>"
         }

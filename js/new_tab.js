@@ -31,7 +31,13 @@ async function create_tab() {
                 var n = document.getElementById("row_" + i + "_string_" + j).innerHTML;
 
                 if (n == "-")
-                    tabs[j - 1].push(0);
+                    tabs[j - 1].push(100);
+                else if (n == "X")
+                    tabs[j - 1].push(101);
+                else if (n == "~")
+                    tabs[j - 1].push(102);
+                else if (n == "/")
+                    tabs[j - 1].push(103);
                 else
                     tabs[j - 1].push(parseInt(n));
             }
@@ -47,18 +53,33 @@ async function create_tab() {
     console.log(resp);
 }
 
+function check_if_value_is_valid(value) {
+    const valid_inputs = ["", "X", "~", "/"]
+    if (valid_inputs.includes(value))
+        return true;
+    var c = parseInt(value);
+    if (isNaN(c) || c < 0 || c > 99)
+        return false;
+    return true;
+}
+
 function update_row(number) {
     var n = document.getElementById("string_select_" + number).value;
 
-    if (n == 0)
+    if (n == "")
         n = "-";
     document.getElementById("row_" + row + "_string_" + number).innerHTML = n;
-    document.getElementById("string_select_" + number).value = 0;
+    document.getElementById("string_select_" + number).value = "";
 }
 
 function next_row() {
     document.getElementById("tab_error_msg").innerHTML = ""
 
+    for (var i = 1; i <= 6; i++)
+        if (!check_if_value_is_valid(document.getElementById("string_select_" + i).value)) {
+            document.getElementById("tab_error_msg").innerHTML = "please use values between 0 and 99, X, ~, /, or leave it empty"
+            return
+        }
     document.getElementById("prev_tabs").innerHTML = document.getElementById("prev_tabs").innerHTML +
         '<div class="static_tab_row" id="row_'
         + row + '_container"><button class="edit_column_button" onclick="edit_row('
@@ -70,11 +91,6 @@ function next_row() {
         + row + '_string_4" class="static_tab_bit"></p><p id="row_'
         + row + '_string_5" class="static_tab_bit"></p><p id="row_'
         + row + '_string_6" class="static_tab_bit"></p></div>';
-    for (var i = 1; i <= 6; i++)
-        if (document.getElementById("string_select_" + i).value >= 100 || document.getElementById("string_select_" + i).value < 0) {
-            document.getElementById("tab_error_msg").innerHTML = "please use values between 0 and 99"
-            return
-        }
     for (var i = 1; i <= 6; i++)
         update_row(i);
     row += 1;
