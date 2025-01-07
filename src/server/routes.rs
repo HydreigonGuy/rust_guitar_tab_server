@@ -229,7 +229,6 @@ pub async fn list_public_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool) -> R
 
 pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str, user_id: i32) -> Result<(), Box<dyn Error>> {
     let q = format!("SELECT title, tab, UserID, visibility FROM tab WHERE id = {}", id.to_string());
-    println!("{}", q);
     let row = sqlx::query(&q).fetch_one(&db_pool).await?;
 
     let title: String = row.get("title");
@@ -241,10 +240,15 @@ pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str, use
         return Ok(());
     }
 
+    let mut user_owns_tab: u8 = 0;
+    if  tab_user_id == user_id {
+        user_owns_tab = 1;
+    }
+
     let tab: String = row.get_unchecked("tab");
     let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);
 
-    let contents = format!("{{\"title\":\"{}\",\"tab\":{:?}}}", title, tab);
+    let contents = format!("{{\"title\":\"{}\",\"owner\":{},\"tab\":{:?}}}", title, user_owns_tab, tab);
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
         contents.len(),
@@ -252,6 +256,24 @@ pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str, use
     );
     stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
+    Ok(())
+}
+
+pub async fn tab_delete(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str, user_id: i32) -> Result<(), Box<dyn Error>> {
+    let q = format!("SELECT UserID FROM tab WHERE id = {}", id.to_string());
+    let row = sqlx::query(&q).fetch_one(&db_pool).await?;
+
+    let tab_user_id: i32 = row.get("userid");
+    if tab_user_id != user_id {
+        page_does_not_exist(stream);
+        return Ok(());
+    }
+
+    let q = format!("DELETE FROM tab WHERE id = {}", id.to_string());
+    println!("{}", q);
+    sqlx::query(&q).execute(&db_pool).await?;
+
+    send_success(stream);
     Ok(())
 }
 

@@ -29,6 +29,21 @@ async function get_tab() {
             tab_contents = tab_contents + "</div>"
         }
         document.getElementById("tab_contents").innerHTML = tab_contents;
+        if (tab.owner == 1) {
+            document.getElementById("owner_options").innerHTML = '<button onclick="delete_tab()">delete</button>'
+        }
+    })
+}
+
+async function delete_tab() {
+    fetch(
+        "/delete/" + window.location.pathname.split("/")[2],
+        {
+            method: "GET"
+        }
+    ).then(resp => resp.text())
+    .then(_ => {
+        window.location.href = "/";
     })
 }
 

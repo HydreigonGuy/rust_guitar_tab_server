@@ -93,6 +93,10 @@ pub async fn route(mut stream: TcpStream, db_pool: sqlx::PgPool) -> Result<(), B
                             let id = path.split("/").collect::<Vec<&str>>()[2];
                             tab_get(stream, db_pool, id, user_id).await?;
                         }
+                        "delete" => {
+                            let id = path.split("/").collect::<Vec<&str>>()[2];
+                            tab_delete(stream, db_pool, id, user_id).await?;
+                        }
                         "login" => login_page(stream),
                         "register" => register_page(stream),
                         "styles.css" => styles_file(stream),
