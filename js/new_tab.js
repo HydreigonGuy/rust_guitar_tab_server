@@ -51,6 +51,8 @@ async function create_tab() {
         }
     );
     console.log(resp);
+    if (resp.status == 200)
+        window.location.href = "/";
 }
 
 function check_if_value_is_valid(value) {
