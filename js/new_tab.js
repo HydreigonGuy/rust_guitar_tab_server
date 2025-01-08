@@ -7,6 +7,7 @@ var editing = [];
 
 async function create_tab() {
     var title = document.getElementById("tab_name").value;
+    var comment = document.getElementById("comment").value;
     var tabs = [[], [], [], [], [], []];
     const visibility = parseInt(document.getElementById("visibillity_selecter").value);
 
@@ -47,7 +48,7 @@ async function create_tab() {
         "new_tab",
         {
             method: "POST",
-            body: JSON.stringify({ title: title, tab: tabs, visibility: visibility }),
+            body: JSON.stringify({ title: title, tab: tabs, visibility: visibility, comment: comment }),
         }
     );
     console.log(resp);

@@ -124,7 +124,7 @@ pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPo
             match json_result {
                 Ok(new_tab) => {
                     let query = format!(
-                        "INSERT INTO tab (title, tab, UserID, visibility) VALUES ('{}', ARRAY[{}], {}, {})",
+                        "INSERT INTO tab (title, tab, UserID, visibility, comment) VALUES ('{}', ARRAY[{}], {}, {}, '{}')",
                         new_tab.title, new_tab.tab.iter().map(
                             |string| {
                                 let string_str= string.iter().map(|n| n.to_string()).collect::<Vec<String>>().join(",");
@@ -132,7 +132,8 @@ pub async fn new_tab(mut stream: TcpStream, request: String, db_pool: sqlx::PgPo
                             }
                         ).collect::<Vec<String>>().join(","),
                         user_id,
-                        new_tab.visibility
+                        new_tab.visibility,
+                        new_tab.comment
                     );
     
                     sqlx::query(&query).execute(&db_pool).await?;
@@ -228,10 +229,11 @@ pub async fn list_public_tabs(mut stream: TcpStream, db_pool: sqlx::PgPool) -> R
 }
 
 pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str, user_id: i32) -> Result<(), Box<dyn Error>> {
-    let q = format!("SELECT title, tab, UserID, visibility FROM tab WHERE id = {}", id.to_string());
+    let q = format!("SELECT title, tab, UserID, visibility, comment FROM tab WHERE id = {}", id.to_string());
     let row = sqlx::query(&q).fetch_one(&db_pool).await?;
 
     let title: String = row.get("title");
+    let comment: String = row.get("comment");
 
     let tab_user_id: i32 = row.get("userid");
     let visibility: i32 = row.get("visibility"); // 0 for private, 1 for public
@@ -248,7 +250,7 @@ pub async fn tab_get(mut stream: TcpStream, db_pool: sqlx::PgPool, id: &str, use
     let tab: String = row.get_unchecked("tab");
     let tab: Vec<Vec<u32>> = decyfer_tab_from_db(tab);
 
-    let contents = format!("{{\"title\":\"{}\",\"owner\":{},\"tab\":{:?}}}", title, user_owns_tab, tab);
+    let contents = format!("{{\"title\":\"{}\",\"owner\":{},\"tab\":{:?},\"comment\":\"{}\"}}", title, user_owns_tab, tab, comment);
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
         contents.len(),

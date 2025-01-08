@@ -80,3 +80,8 @@
 .new_tap_input {
     width: 20px;
 }
+
+.tab_creating_comment {
+    width: 600px;
+    height: 100px;
+}

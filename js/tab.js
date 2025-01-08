@@ -7,9 +7,10 @@ async function get_tab() {
         }
     ).then(resp => resp.text())
     .then(data => {
-        const tab = JSON.parse(data);
+        const tab = JSON.parse(data.replaceAll("\n", ""));
 
         document.getElementById("tab_title").innerHTML = tab.title;
+        document.getElementById("tab_comment").innerHTML = tab.comment;
         var tab_contents = "";
         for (i = 0; i < tab.tab[0].length; i++) {
             tab_contents = tab_contents + '<div class="static_tab_row">'
