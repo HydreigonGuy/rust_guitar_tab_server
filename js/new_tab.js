@@ -119,7 +119,7 @@ function edit_row(row) {
             }
         for (var i = 1; i <= 6; i++) {
             var n = document.getElementById("row_" + row + "_string_" + i + "_input").value;
-            if (n == 0)
+            if (n == "")
                 n = "-";
             document.getElementById("row_" + row + "_string_" + i).innerHTML = n;
         }
@@ -128,8 +128,8 @@ function edit_row(row) {
         for (var i = 1; i <= 6; i++) {
             var n = document.getElementById("row_" + row + "_string_" + i).innerHTML;
             if (n == "-")
-                n = 0;
-            document.getElementById("row_" + row + "_string_" + i).innerHTML = '<input id="row_' + row + '_string_' + i + '_input" type="number" value="' + n + '" min="0" max="24"/>';
+                n = "";
+            document.getElementById("row_" + row + "_string_" + i).innerHTML = '<input id="row_' + row + '_string_' + i + '_input" type="text" value="' + n + '" class="new_tap_input"/>';
         }
         editing.push(row);
     }
